@@ -4,9 +4,14 @@ import AppError from "../utils/AppError.js";
 // Create category
 export async function createCategory(req, res) {
   try {
-    const { Name, ParentCategory, Image } = req.body;
+    const { Name, ParentCategory, Image, isSubCategory } = req.body;
     const imagePath = req.file ? req.file.path : Image;
-    const category = new Category({ Name, ParentCategory, Image: imagePath });
+    const category = new Category({
+      Name,
+      ParentCategory,
+      Image: imagePath,
+      isSubCategory,
+    });
     await category.save();
     res.status(201).json(category);
   } catch (err) {
@@ -17,7 +22,7 @@ export async function createCategory(req, res) {
 // Get all categories
 export async function getCategories(req, res) {
   try {
-    const categories = await Category.find();
+    const categories = await Category.find().populate("ParentCategory");
     res.json(categories);
   } catch (err) {
     next(new AppError(err.message || "Server error", 500));
@@ -27,7 +32,9 @@ export async function getCategories(req, res) {
 // Get single category
 export async function getCategory(req, res) {
   try {
-    const category = await Category.findById(req.params.id);
+    const category = await Category.findById(req.params.id).populate(
+      "ParentCategory"
+    );
     if (!category) return next(new AppError("Category not found", 404));
     res.json(category);
   } catch (err) {

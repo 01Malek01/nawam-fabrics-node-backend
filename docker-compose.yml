@@ -1,5 +1,5 @@
 services:
-  backend:
+  node-backend:
     build: .
     container_name: nawam-fabrics-node-backend
     ports:
@@ -9,6 +9,8 @@ services:
     depends_on:
       - mongo
     restart: unless-stopped
+    volumes:
+      - ./uploads:/app/uploads
   mongo:
     image: mongo
     container_name: nawam-fabrics-mongo

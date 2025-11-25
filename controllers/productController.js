@@ -1,24 +1,6 @@
 import AppError from "../utils/AppError.js";
-// Update product video
-export async function updateProductVideo(req, res) {
-  try {
-    const productId = req.params.id;
-    const videoFile = req.file;
-    if (!videoFile || !videoFile.mimetype.startsWith("video/")) {
-      return next(new AppError("No video file uploaded", 400));
-    }
-    const product = await Product.findByIdAndUpdate(
-      productId,
-      { VideoUrl: videoFile.path },
-      { new: true }
-    );
-    if (!product) return next(new AppError("Product not found", 404));
-    res.json(product);
-  } catch (err) {
-    next(new AppError(err.message || "Server error", 500));
-  }
-}
 import Product from "../models/Product.js";
+import mongoose from "mongoose";
 
 // Create product
 export async function createProduct(req, res) {
@@ -60,9 +42,62 @@ export async function createProduct(req, res) {
 }
 
 // Get all products
-export async function getProducts(req, res) {
+export async function getProducts(req, res, next) {
   try {
-    const products = await Product.find();
+    const { category, subcategory, sort, order } = req.query;
+
+    let match = {};
+    if (category) match.MainCategory = new mongoose.Types.ObjectId(category);
+    if (subcategory)
+      match.SubCategory = new mongoose.Types.ObjectId(subcategory);
+
+    let sortObj = {};
+    if (sort) {
+      const sortField = sort === "price" ? "PricePerMeter" : sort;
+      const sortOrder = order === "desc" ? -1 : 1;
+      sortObj[sortField] = sortOrder;
+    } else {
+      sortObj.createdAt = -1; // default sort by newest
+    }
+
+    const products = await Product.aggregate([
+      {
+        $lookup: {
+          from: "categories",
+          localField: "MainCategory",
+          foreignField: "_id",
+          as: "mainCategory",
+        },
+      },
+      {
+        $lookup: {
+          from: "subcategories",
+          localField: "SubCategory",
+          foreignField: "_id",
+          as: "subCategory",
+        },
+      },
+
+      { $match: match },
+      { $sort: sortObj },
+      {
+        $project: {
+          Name: 1,
+          PricePerMeter: 1,
+          Description: 1,
+          Image: 1,
+          SubCategory: 1,
+          MainCategory: 1,
+          VideoUrl: 1,
+          MostSold: 1,
+          createdAt: 1,
+          updatedAt: 1,
+          mainCategoryName: { $arrayElemAt: ["$mainCategory.Name", 0] },
+          subCategoryName: { $arrayElemAt: ["$subCategory.Name", 0] },
+        },
+      },
+    ]);
+
     res.json(products);
   } catch (err) {
     next(new AppError(err.message || "Server error", 500));
@@ -72,7 +107,9 @@ export async function getProducts(req, res) {
 // Get single product
 export async function getProduct(req, res) {
   try {
-    const product = await Product.findById(req.params.id);
+    const product = await Product.findById(req.params.id)
+      .populate("MainCategory")
+      .populate("SubCategory");
     if (!product) return next(new AppError("Product not found", 404));
     res.json(product);
   } catch (err) {

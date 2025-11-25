@@ -21,12 +21,14 @@ const productSchema = new mongoose.Schema(
       },
     ],
     SubCategory: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
       required: false,
+      ref: "Category",
     },
     MainCategory: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
       required: false,
+      ref: "Category",
     },
     VideoUrl: {
       type: String,
