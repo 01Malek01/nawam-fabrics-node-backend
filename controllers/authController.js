@@ -6,7 +6,7 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import { checkAuth, checkRole, protect } from "../middleware/authMiddleware.js";
 
-export async function signupController(req, res) {
+export async function signupController(req, res, next) {
   const { username, password, email, role } = req.body;
   try {
     const existingUser = await User.findOne({ username });
@@ -30,7 +30,7 @@ export async function signupController(req, res) {
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
-export async function loginController(req, res) {
+export async function loginController(req, res, next) {
   const { username, password } = req.body;
   try {
     const user = await User.findOne({ username });

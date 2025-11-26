@@ -3,7 +3,7 @@ import Product from "../models/Product.js";
 import mongoose from "mongoose";
 
 // Create product
-export async function createProduct(req, res) {
+export async function createProduct(req, res, next) {
   try {
     const {
       Name,
@@ -105,7 +105,7 @@ export async function getProducts(req, res, next) {
 }
 
 // Get single product
-export async function getProduct(req, res) {
+export async function getProduct(req, res, next) {
   try {
     const product = await Product.findById(req.params.id)
       .populate("MainCategory")
@@ -118,7 +118,7 @@ export async function getProduct(req, res) {
 }
 
 // Update product
-export async function updateProduct(req, res) {
+export async function updateProduct(req, res, next) {
   try {
     const {
       Name,
@@ -164,7 +164,7 @@ export async function updateProduct(req, res) {
 }
 
 // Delete product
-export async function deleteProduct(req, res) {
+export async function deleteProduct(req, res, next) {
   try {
     const product = await Product.findByIdAndDelete(req.params.id);
     if (!product) return next(new AppError("Product not found", 404));

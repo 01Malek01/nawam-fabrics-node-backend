@@ -2,7 +2,7 @@ import Category from "../models/Category.js";
 import AppError from "../utils/AppError.js";
 
 // Create category
-export async function createCategory(req, res) {
+export async function createCategory(req, res, next) {
   try {
     const { Name, ParentCategory, Image, isSubCategory } = req.body;
     const imagePath = req.file ? req.file.path : Image;
@@ -31,7 +31,7 @@ export async function createCategory(req, res) {
 }
 
 // Get all categories
-export async function getCategories(req, res) {
+export async function getCategories(req, res, next) {
   try {
     const categories = await Category.find()
       .populate("ParentCategory")
@@ -43,7 +43,7 @@ export async function getCategories(req, res) {
 }
 
 // Get single category
-export async function getCategory(req, res) {
+export async function getCategory(req, res, next) {
   try {
     const category = await Category.findById(req.params.id).populate(
       "ParentCategory"
@@ -56,7 +56,7 @@ export async function getCategory(req, res) {
 }
 
 // Update category
-export async function updateCategory(req, res) {
+export async function updateCategory(req, res, next) {
   try {
     const { Name, ParentCategory, Image } = req.body;
     const existingCategory = await Category.findById(req.params.id);
@@ -85,7 +85,7 @@ export async function updateCategory(req, res) {
 }
 
 // Delete category
-export async function deleteCategory(req, res) {
+export async function deleteCategory(req, res, next) {
   try {
     const category = await Category.findByIdAndDelete(req.params.id);
     if (!category) return next(new AppError("Category not found", 404));

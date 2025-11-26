@@ -3,7 +3,7 @@ import User from "../models/User.js";
 import bcrypt from "bcrypt";
 
 // Get all users
-export async function getUsers(req, res) {
+export async function getUsers(req, res, next) {
   try {
     const users = await User.find();
     res.json(users);
@@ -13,7 +13,7 @@ export async function getUsers(req, res) {
 }
 
 // Get single user
-export async function getUser(req, res) {
+export async function getUser(req, res, next) {
   try {
     const user = await User.findById(req.params.id);
     if (!user) return next(new AppError("User not found", 404));
@@ -24,7 +24,7 @@ export async function getUser(req, res) {
 }
 
 // Create user
-export async function createUser(req, res) {
+export async function createUser(req, res, next) {
   try {
     const { username, password, role, email } = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -37,7 +37,7 @@ export async function createUser(req, res) {
 }
 
 // Update user
-export async function updateUser(req, res) {
+export async function updateUser(req, res, next) {
   try {
     const { username, password, role, email } = req.body;
     const update = { username, role, email };
@@ -53,7 +53,7 @@ export async function updateUser(req, res) {
 }
 
 // Delete user
-export async function deleteUser(req, res) {
+export async function deleteUser(req, res, next) {
   try {
     const user = await User.findByIdAndDelete(req.params.id);
     if (!user) return next(new AppError("User not found", 404));
