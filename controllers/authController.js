@@ -40,7 +40,12 @@ export async function loginController(req, res) {
     const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, {
       expiresIn: "30d",
     });
-    res.cookie("jwt", token, { httpOnly: true });
+    const isProduction = process.env.NODE_ENV === "production";
+    res.cookie("jwt", token, {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? "strict" : "lax",
+    });
     res.json({ message: "Logged in", token });
   } catch (err) {
     next(new AppError(err.message || "Server error", 500));

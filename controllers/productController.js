@@ -129,30 +129,34 @@ export async function updateProduct(req, res) {
       VideoUrl,
       MostSold,
     } = req.body;
-    const images = req.files
-      ? req.files
-          .filter((f) => f.mimetype.startsWith("image/"))
-          .map((f) => f.path)
-      : [];
-    const videos = req.files
-      ? req.files
-          .filter((f) => f.mimetype.startsWith("video/"))
-          .map((f) => f.path)
-      : [];
+    let images = [];
+    let videos = [];
+    if (req.files && req.files.length > 0) {
+      images = req.files
+        .filter((f) => f.mimetype.startsWith("image/"))
+        .map((f) => f.path);
+      videos = req.files
+        .filter((f) => f.mimetype.startsWith("video/"))
+        .map((f) => f.path);
+    }
+    const existingProduct = await Product.findById(req.params.id);
+    if (!existingProduct) return next(new AppError("Product not found", 404));
     const update = {
       Name,
       PricePerMeter,
       Description,
-      Image: images,
+      Image:
+        images.length > 0
+          ? [...existingProduct.Image, ...images]
+          : existingProduct.Image,
       SubCategory,
       MainCategory,
-      VideoUrl: videos[0] || VideoUrl,
+      VideoUrl: videos.length > 0 ? videos[0] : existingProduct.VideoUrl,
       MostSold,
     };
     const product = await Product.findByIdAndUpdate(req.params.id, update, {
       new: true,
     });
-    if (!product) return next(new AppError("Product not found", 404));
     res.json(product);
   } catch (err) {
     next(new AppError(err.message || "Server error", 500));

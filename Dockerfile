@@ -15,5 +15,4 @@ COPY . .
 # Expose the port (default: 5000)
 EXPOSE 5000
 
-# Start the server with nodemon for development
-CMD ["npx", "nodemon", "server.js"]
+CMD ["node", "server.js"]
