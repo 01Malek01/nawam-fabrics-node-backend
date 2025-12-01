@@ -8,6 +8,7 @@ import {
   getProduct,
   updateProduct,
   deleteProduct,
+  deleteProductImage,
 } from "../controllers/productController.js";
 
 const router = express.Router();
@@ -31,5 +32,6 @@ router.put(
   updateProduct
 );
 router.delete("/products/:id", deleteProduct);
+router.put("/products/:productId/gallery/:imageIndex", deleteProductImage);
 
 export default router;

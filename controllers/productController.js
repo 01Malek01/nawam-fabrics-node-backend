@@ -173,3 +173,19 @@ export async function deleteProduct(req, res, next) {
     next(new AppError(err.message || "Server error", 500));
   }
 }
+
+export const deleteProductImage = async (req, res, next) => {
+  try {
+    const { productId, imageIndex } = req.params;
+    const product = await Product.findById(productId);
+    if (!product) return next(new AppError("Product not found", 404));
+    if (imageIndex < 0 || imageIndex >= product.Image.length) {
+      return next(new AppError("Image index out of bounds", 400));
+    }
+    product.Image.splice(imageIndex, 1);
+    await product.save();
+    res.json(product);
+  } catch (err) {
+    next(new AppError(err.message || "Server error", 500));
+  }
+};
