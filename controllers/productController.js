@@ -1,6 +1,8 @@
 import AppError from "../utils/AppError.js";
 import Product from "../models/Product.js";
 import mongoose from "mongoose";
+import fs from "fs";
+import path from "path";
 
 // Create product
 export async function createProduct(req, res, next) {
@@ -166,8 +168,41 @@ export async function updateProduct(req, res, next) {
 // Delete product
 export async function deleteProduct(req, res, next) {
   try {
-    const product = await Product.findByIdAndDelete(req.params.id);
+    const product = await Product.findById(req.params.id);
     if (!product) return next(new AppError("Product not found", 404));
+
+    // remove images from disk
+    try {
+      if (Array.isArray(product.Image)) {
+        for (const img of product.Image) {
+          if (!img) continue;
+          const imgPath = path.isAbsolute(img)
+            ? img
+            : path.join(process.cwd(), img);
+          const uploadsDir = path.join(process.cwd(), "uploads");
+          const relative = path.relative(uploadsDir, imgPath);
+          if (!relative.startsWith("..") && !path.isAbsolute(relative)) {
+            if (fs.existsSync(imgPath)) fs.unlinkSync(imgPath);
+          }
+        }
+      }
+      // remove video
+      if (product.VideoUrl) {
+        const vid = product.VideoUrl;
+        const vidPath = path.isAbsolute(vid)
+          ? vid
+          : path.join(process.cwd(), vid);
+        const uploadsDir = path.join(process.cwd(), "uploads");
+        const relativeV = path.relative(uploadsDir, vidPath);
+        if (!relativeV.startsWith("..") && !path.isAbsolute(relativeV)) {
+          if (fs.existsSync(vidPath)) fs.unlinkSync(vidPath);
+        }
+      }
+    } catch (e) {
+      console.warn("Failed removing product files:", e.message);
+    }
+
+    await Product.findByIdAndDelete(req.params.id);
     res.json({ message: "Product deleted" });
   } catch (err) {
     next(new AppError(err.message || "Server error", 500));
@@ -182,7 +217,53 @@ export const deleteProductImage = async (req, res, next) => {
     if (imageIndex < 0 || imageIndex >= product.Image.length) {
       return next(new AppError("Image index out of bounds", 400));
     }
+    // remove file from disk if it's inside uploads
+    const removed = product.Image[imageIndex];
+    try {
+      if (removed) {
+        const imgPath = path.isAbsolute(removed)
+          ? removed
+          : path.join(process.cwd(), removed);
+        const uploadsDir = path.join(process.cwd(), "uploads");
+        const relative = path.relative(uploadsDir, imgPath);
+        if (!relative.startsWith("..") && !path.isAbsolute(relative)) {
+          if (fs.existsSync(imgPath)) fs.unlinkSync(imgPath);
+        }
+      }
+    } catch (e) {
+      console.warn("Failed removing image file:", e.message);
+    }
+
     product.Image.splice(imageIndex, 1);
+    await product.save();
+    res.json(product);
+  } catch (err) {
+    next(new AppError(err.message || "Server error", 500));
+  }
+};
+
+export const deleteProductVideo = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const product = await Product.findById(id);
+    if (!product) return next(new AppError("Product not found", 404));
+    const videoPath = product.VideoUrl;
+    if (videoPath) {
+      try {
+        const absolute = path.isAbsolute(videoPath)
+          ? videoPath
+          : path.join(process.cwd(), videoPath);
+        const uploadsDir = path.join(process.cwd(), "uploads");
+        const relative = path.relative(uploadsDir, absolute);
+        if (!relative.startsWith("..") && !path.isAbsolute(relative)) {
+          if (fs.existsSync(absolute)) fs.unlinkSync(absolute);
+        }
+      } catch (e) {
+        console.warn("Failed removing video file:", e.message);
+      }
+    }
+
+    product.VideoUrl = undefined;
     await product.save();
     res.json(product);
   } catch (err) {
