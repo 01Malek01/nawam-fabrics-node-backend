@@ -52,7 +52,9 @@ export async function createReservation(req, res, next) {
 // Admin: get all reservations
 export async function getReservations(req, res, next) {
   try {
-    const reservations = await Reservation.find().sort({ createdAt: -1 });
+    const reservations = await Reservation.find()
+      .sort({ createdAt: -1 })
+      .populate("productRecordId");
     res.json(reservations);
   } catch (err) {
     next(new AppError(err.message || "Server error", 500));
