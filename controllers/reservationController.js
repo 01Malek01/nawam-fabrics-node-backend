@@ -102,3 +102,61 @@ export async function updateReservationStatus(req, res, next) {
     next(new AppError(err.message || "Server error", 500));
   }
 }
+
+// Admin: update reservation note
+export async function updateReservationNote(req, res, next) {
+  try {
+    const { note } = req.body;
+    const reservation = await Reservation.findByIdAndUpdate(
+      req.params.id,
+      { note },
+      { new: true }
+    );
+    if (!reservation) return next(new AppError("Reservation not found", 404));
+    res.json(reservation);
+  } catch (err) {
+    next(new AppError(err.message || "Server error", 500));
+  }
+}
+
+// Admin: get reservation note
+export async function getReservationNote(req, res, next) {
+  try {
+    const reservation = await Reservation.findById(req.params.id).select(
+      "note"
+    );
+    if (!reservation) return next(new AppError("Reservation not found", 404));
+    res.json({ note: reservation.note });
+  } catch (err) {
+    next(new AppError(err.message || "Server error", 500));
+  }
+}
+
+// Admin: update chat summary
+export async function updateReservationSummary(req, res, next) {
+  try {
+    const { summary } = req.body;
+    const reservation = await Reservation.findByIdAndUpdate(
+      req.params.id,
+      { chatSummary: summary },
+      { new: true }
+    );
+    if (!reservation) return next(new AppError("Reservation not found", 404));
+    res.json(reservation);
+  } catch (err) {
+    next(new AppError(err.message || "Server error", 500));
+  }
+}
+
+// Admin: get chat summary
+export async function getReservationSummary(req, res, next) {
+  try {
+    const reservation = await Reservation.findById(req.params.id).select(
+      "chatSummary"
+    );
+    if (!reservation) return next(new AppError("Reservation not found", 404));
+    res.json({ summary: reservation.chatSummary });
+  } catch (err) {
+    next(new AppError(err.message || "Server error", 500));
+  }
+}

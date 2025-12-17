@@ -17,6 +17,7 @@ const reservationSchema = new mongoose.Schema(
       enum: ["pending", "confirmed", "cancelled"],
       default: "pending",
     },
+    chatSummary: { type: String },
     note: { type: String },
   },
   { timestamps: true }
