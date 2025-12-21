@@ -40,6 +40,46 @@ app.use(
     });
   })()
 );
+
+// Cleanup CORS header: if multiple values are present combine/replace
+// to ensure only a single, specific origin is returned (required when credentials=true).
+app.use((req, res, next) => {
+  const header = res.getHeader("Access-Control-Allow-Origin");
+  if (!header) return next();
+
+  const whitelist = [
+    "http://localhost:5173",
+    "http://localhost:3000",
+    "https://elnawamfabrics.com",
+    "https://www.elnawamfabrics.com",
+  ];
+
+  const originHeader = req.headers.origin;
+
+  let chosen = header;
+  // Normalize to array
+  const values = Array.isArray(header)
+    ? header
+    : String(header)
+        .split(",")
+        .map((v) => v.trim());
+  // Prefer the request origin if present in values and whitelist
+  if (
+    originHeader &&
+    values.indexOf(originHeader) !== -1 &&
+    whitelist.indexOf(originHeader) !== -1
+  ) {
+    chosen = originHeader;
+  } else {
+    // Otherwise pick the first value that is not '*', or fallback to the first value
+    chosen = values.find((v) => v !== "*") || values[0];
+  }
+
+  if (chosen) {
+    res.setHeader("Access-Control-Allow-Origin", chosen);
+  }
+  next();
+});
 app.use("/uploads", express.static("uploads"));
 
 // test route
