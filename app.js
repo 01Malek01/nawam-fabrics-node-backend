@@ -17,15 +17,28 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 app.use(
-  cors({
-    origin: [
+  // Use a whitelist and reflect the request origin when allowed.
+  // Important: when credentials are included, the Access-Control-Allow-Origin
+  // header must be a specific origin (not '*').
+  (() => {
+    const whitelist = [
       "http://localhost:5173",
       "http://localhost:3000",
       "https://elnawamfabrics.com",
-      "https://elnawamfabrics.com/",
-    ],
-    credentials: true,
-  })
+      "https://www.elnawamfabrics.com",
+    ];
+    return cors({
+      origin: (origin, callback) => {
+        // Allow requests with no origin (e.g., server-to-server, curl)
+        if (!origin) return callback(null, true);
+        if (whitelist.indexOf(origin) !== -1) {
+          return callback(null, true);
+        }
+        return callback(new Error("Not allowed by CORS"), false);
+      },
+      credentials: true,
+    });
+  })()
 );
 app.use("/uploads", express.static("uploads"));
 
