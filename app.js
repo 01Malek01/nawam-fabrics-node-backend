@@ -22,6 +22,7 @@ app.use(
       "http://localhost:5173",
       "http://localhost:3000",
       "https://elnawamfabrics.com",
+      "https://elnawamfabrics.com/",
     ],
     credentials: true,
   })
