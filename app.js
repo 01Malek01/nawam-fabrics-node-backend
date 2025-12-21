@@ -48,8 +48,8 @@ app.use((req, res, next) => {
   if (!header) return next();
 
   const whitelist = [
-    "http://localhost:5173",
-    "http://localhost:3000",
+    // "http://localhost:5173",
+    // "http://localhost:3000",
     "https://elnawamfabrics.com",
     "https://www.elnawamfabrics.com",
   ];
