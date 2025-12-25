@@ -15,6 +15,9 @@ export async function createProduct(req, res, next) {
       MainCategory,
       VideoUrl,
       MostSold,
+      discount,
+      discountText,
+      isNewArrival,
     } = req.body;
     const images = req.files
       ? req.files
@@ -35,6 +38,9 @@ export async function createProduct(req, res, next) {
       MainCategory,
       VideoUrl: videos[0] || VideoUrl,
       MostSold,
+      discount,
+      discountText,
+      isNewArrival,
     });
     await product.save();
     res.status(201).json(product);
@@ -92,6 +98,9 @@ export async function getProducts(req, res, next) {
           MainCategory: 1,
           VideoUrl: 1,
           MostSold: 1,
+          discount: 1,
+          discountText: 1,
+          isNewArrival: 1,
           createdAt: 1,
           updatedAt: 1,
           mainCategoryName: { $arrayElemAt: ["$mainCategory.Name", 0] },
@@ -130,6 +139,9 @@ export async function updateProduct(req, res, next) {
       MainCategory,
       VideoUrl,
       MostSold,
+      discount,
+      discountText,
+      isNewArrival,
     } = req.body;
     let images = [];
     let videos = [];
@@ -155,6 +167,9 @@ export async function updateProduct(req, res, next) {
       MainCategory,
       VideoUrl: videos.length > 0 ? videos[0] : existingProduct.VideoUrl,
       MostSold,
+      discount,
+      discountText,
+      isNewArrival,
     };
     const product = await Product.findByIdAndUpdate(req.params.id, update, {
       new: true,

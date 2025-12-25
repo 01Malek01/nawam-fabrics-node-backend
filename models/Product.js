@@ -38,6 +38,18 @@ const productSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    discount: {
+      type: Number,
+      default: 0,
+    },
+    discountText: {
+      type: String,
+      default: "",
+    },
+    isNewArrival: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );

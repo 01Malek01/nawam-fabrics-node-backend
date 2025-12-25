@@ -16,30 +16,34 @@ const app = express();
 // Middleware
 app.use(express.json());
 app.use(cookieParser());
-// app.use(
-//   // Use a whitelist and reflect the request origin when allowed.
-//   // Important: when credentials are included, the Access-Control-Allow-Origin
-//   // header must be a specific origin (not '*').
-//   (() => {
-//     const whitelist = [
-//       "http://localhost:5173",
-//       "http://localhost:3000",
-//       "https://elnawamfabrics.com",
-//       "https://www.elnawamfabrics.com",
-//     ];
-//     return cors({
-//       origin: (origin, callback) => {
-//         // Allow requests with no origin (e.g., server-to-server, curl)
-//         if (!origin) return callback(null, true);
-//         if (whitelist.indexOf(origin) !== -1) {
-//           return callback(null, true);
-//         }
-//         return callback(new Error("Not allowed by CORS"), false);
-//       },
-//       credentials: true,
-//     });
-//   })()
-// );
+
+//in production it's handled by nginx
+if (process.env.NODE_ENV !== "production") {
+  app.use(
+    // Use a whitelist and reflect the request origin when allowed.
+    // Important: when credentials are included, the Access-Control-Allow-Origin
+    // header must be a specific origin (not '*').
+    (() => {
+      const whitelist = [
+        "http://localhost:5173",
+        "http://localhost:3000",
+        "https://elnawamfabrics.com",
+        "https://www.elnawamfabrics.com",
+      ];
+      return cors({
+        origin: (origin, callback) => {
+          // Allow requests with no origin (e.g., server-to-server, curl)
+          if (!origin) return callback(null, true);
+          if (whitelist.indexOf(origin) !== -1) {
+            return callback(null, true);
+          }
+          return callback(new Error("Not allowed by CORS"), false);
+        },
+        credentials: true,
+      });
+    })()
+  );
+}
 
 // Cleanup CORS header: if multiple values are present combine/replace
 // to ensure only a single, specific origin is returned (required when credentials=true).

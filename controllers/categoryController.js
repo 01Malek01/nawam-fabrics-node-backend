@@ -4,13 +4,14 @@ import AppError from "../utils/AppError.js";
 // Create category
 export async function createCategory(req, res, next) {
   try {
-    const { Name, ParentCategory, Image, isSubCategory } = req.body;
+    const { Name, ParentCategory, Image, isSubCategory, priority } = req.body;
     const imagePath = req.file ? req.file.path : Image;
     const category = new Category({
       Name,
       ParentCategory,
       Image: imagePath,
       isSubCategory,
+      priority,
     });
     if (isSubCategory && !ParentCategory) {
       return next(new AppError("Subcategory must have a ParentCategory", 400));
@@ -34,6 +35,7 @@ export async function createCategory(req, res, next) {
 export async function getCategories(req, res, next) {
   try {
     const categories = await Category.find()
+      .sort({ priority: 1 })
       .populate("ParentCategory")
       .populate("subCategories");
     res.json(categories);
@@ -58,13 +60,13 @@ export async function getCategory(req, res, next) {
 // Update category
 export async function updateCategory(req, res, next) {
   try {
-    const { Name, ParentCategory, Image } = req.body;
+    const { Name, ParentCategory, Image, priority } = req.body;
     const existingCategory = await Category.findById(req.params.id);
     if (!existingCategory) return next(new AppError("Category not found", 404));
     const imagePath = req.file
       ? req.file.path
       : Image || existingCategory.Image;
-    const update = { Name, ParentCategory, Image: imagePath };
+    const update = { Name, ParentCategory, Image: imagePath, priority };
     const category = await Category.findByIdAndUpdate(req.params.id, update, {
       new: true,
     });

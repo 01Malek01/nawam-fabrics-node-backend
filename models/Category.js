@@ -26,6 +26,10 @@ const categorySchema = new mongoose.Schema(
         ref: "Category",
       },
     ],
+    priority: {
+      type: Number,
+      default: 999,
+    },
   },
   { timestamps: true }
 );
