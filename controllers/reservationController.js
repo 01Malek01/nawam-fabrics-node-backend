@@ -52,9 +52,27 @@ export async function createReservation(req, res, next) {
 // Admin: get all reservations
 export async function getReservations(req, res, next) {
   try {
-    const reservations = await Reservation.find()
-      .sort({ createdAt: -1 })
-      .populate("productRecordId");
+    // Pagination params
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.max(1, parseInt(req.query.limit) || 20);
+    // Sorting params
+    const sortField = req.query.sort || "createdAt";
+    const sortOrder = req.query.order === "asc" ? 1 : -1;
+
+    const sortObj = {};
+    sortObj[sortField] = sortOrder;
+
+    const filter = {}; // keep for future filters
+
+    const total = await Reservation.countDocuments(filter);
+    const pages = Math.ceil(total / limit) || 1;
+
+    const reservations = await Reservation.find(filter)
+      .populate("productRecordId")
+      .sort(sortObj)
+      .skip((page - 1) * limit)
+      .limit(limit);
+
     res.json(reservations);
   } catch (err) {
     next(new AppError(err.message || "Server error", 500));
