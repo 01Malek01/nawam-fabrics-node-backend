@@ -17,15 +17,11 @@ const userSchema = new mongoose.Schema(
       enum: ["admin", "user"],
       default: "user",
     },
-    email: {
-      type: String,
-      required: false,
-      unique: true,
-      trim: true,
-    },
   },
   { timestamps: true }
 );
+
+userSchema.index({ username: 1 }, { unique: true, sparse: true });
 
 const User = mongoose.model("User", userSchema);
 export default User;

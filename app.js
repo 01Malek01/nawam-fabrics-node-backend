@@ -9,6 +9,7 @@ import adminRoutes from "./routes/admin.js";
 import adminProductRoutes from "./routes/adminProduct.js";
 import adminCategoryRoutes from "./routes/adminCategory.js";
 import reservationRoutes from "./routes/reservations.js";
+import cartRoutes from "./routes/cart.js";
 import adminReservationRoutes from "./routes/adminReservations.js";
 import adminLastPieceRoutes from "./routes/adminLastPiece.js";
 import lastPiecePublicRoutes from "./routes/lastPiecePublic.js";
@@ -103,6 +104,7 @@ app.use("/api/admin", adminLastPieceRoutes);
 app.use("/api", publicRoutes);
 app.use("/api", lastPiecePublicRoutes);
 app.use("/api/reservations", reservationRoutes);
+app.use("/api/cart", cartRoutes);
 
 // Global error handler
 app.use(globalErrorHandler);
