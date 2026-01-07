@@ -55,7 +55,16 @@ export async function loginController(req, res, next) {
       secure: isProduction,
       sameSite: isProduction ? "strict" : "lax",
     });
-    res.json({ status: "success", message: "Logged in", token });
+    res.json({
+      status: "success",
+      message: "Logged in",
+      token,
+      user: {
+        id: user._id,
+        username: user.username,
+        role: user.role,
+      },
+    });
   } catch (err) {
     next(new AppError(err.message || "خطأ في الخادم", 500));
   }
