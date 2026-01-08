@@ -50,6 +50,16 @@ const productSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    stock: [
+      {
+        color: {
+          type: String,
+        },
+        meters: {
+          type: Number,
+        },
+      },
+    ],
   },
   { timestamps: true }
 );

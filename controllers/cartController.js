@@ -1,6 +1,7 @@
 import AppError from "../utils/AppError.js";
 import Cart from "../models/Cart.js";
 import Product from "../models/Product.js";
+import LastPiece from "../models/LastPiece.js";
 
 export async function getCart(req, res, next) {
   try {
@@ -17,30 +18,42 @@ export async function addItemToCart(req, res, next) {
   const { productId, quantity = 1, meters = 1 } = req.body;
   if (!productId) return next(new AppError("productId is required", 400));
   try {
-    const product = await Product.findById(productId);
-    if (!product) return next(new AppError("المنتج غير موجود", 404));
+    let product = await Product.findById(productId);
+    let lastPiece = null;
+    if (!product) {
+      // try last pieces if product not found
+      lastPiece = await LastPiece.findById(productId);
+      if (!lastPiece) return next(new AppError("المنتج غير موجود", 404));
+    }
 
     let cart = await Cart.findOne({ user: req.user.id });
     if (!cart) {
       cart = new Cart({ user: req.user.id, items: [] });
     }
-
+    const itemId = product ? product._id : lastPiece.product;
     const existingIndex = cart.items.findIndex((it) =>
-      it.product.equals(product._id)
+      it.product.equals(itemId)
     );
     if (existingIndex > -1) {
-      // update existing item: set meters and increase quantity
       cart.items[existingIndex].quantity += Number(quantity);
       cart.items[existingIndex].meters = Number(meters);
-      // refresh images snapshot from product
-      cart.items[existingIndex].images = product.Image ?? [];
+      cart.items[existingIndex].images = product
+        ? product.Image ?? []
+        : [lastPiece.image].filter(Boolean);
+      cart.items[existingIndex].pricePerMeter = product
+        ? product.PricePerMeter ?? 0
+        : lastPiece.price ?? 0;
     } else {
       cart.items.push({
-        product: product._id,
+        product: itemId,
         quantity: Number(quantity),
-        meters: Number(meters),
-        pricePerMeter: product.PricePerMeter ?? 0,
-        images: product.Image ?? [],
+        meters: Number(meters) || (lastPiece ? lastPiece.length ?? 1 : 1),
+        pricePerMeter: product
+          ? product.PricePerMeter ?? 0
+          : lastPiece.price ?? 0,
+        images: product
+          ? product.Image ?? []
+          : [lastPiece.image].filter(Boolean),
       });
     }
 

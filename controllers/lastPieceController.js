@@ -1,5 +1,6 @@
 import AppError from "../utils/AppError.js";
 import LastPiece from "../models/LastPiece.js";
+import Product from "../models/Product.js";
 import fs from "fs";
 import path from "path";
 
@@ -10,7 +11,30 @@ export async function createLastPiece(req, res, next) {
     const image =
       req.files && req.files.length > 0 ? req.files[0].path : undefined;
 
-    const lp = new LastPiece({ name, length, price, image, product, category });
+    let productId = product;
+    // if no product id provided, create a new Product from last-piece data
+    if (!productId) {
+      const prod = new Product({
+        Name: name,
+        PricePerMeter: price ?? 0,
+        Description: "",
+        Image: image ? [image] : [],
+        MainCategory: category ?? undefined,
+        SubCategory: category ?? undefined,
+        stock: { meters: length ?? 0 },
+      });
+      await prod.save();
+      productId = prod._id;
+    }
+
+    const lp = new LastPiece({
+      name,
+      length,
+      price,
+      image,
+      product: productId,
+      category,
+    });
     await lp.save();
     res.status(201).json(lp);
   } catch (err) {

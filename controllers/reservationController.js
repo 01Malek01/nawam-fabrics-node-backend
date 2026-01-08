@@ -49,6 +49,69 @@ export async function createReservation(req, res, next) {
   }
 }
 
+//create cart reservation
+export async function createCartReservation(req, res, next) {
+  try {
+    const body = req.body;
+
+    // Validation
+    if (!body.customerName || String(body.customerName).trim().length < 2) {
+      return next(new AppError("الاسم يجب أن يكون على الأقل حرفين", 400));
+    }
+    const phoneRe = /^\+?[0-9\s-]{10,}$/;
+    if (!body.customerPhone || !phoneRe.test(String(body.customerPhone))) {
+      return next(new AppError("رقم الهاتف غير صالح", 400));
+    }
+    //quantity metres in cart item
+    if (
+      !body.customerAddress ||
+      String(body.customerAddress).trim().length < 5
+    ) {
+      return next(new AppError("العنوان يجب أن يكون على الأقل 5 أحرف", 400));
+    }
+    // cart items: expect array of { productRecordId, quantityMeters, Images }
+    if (!Array.isArray(body.items) || body.items.length < 1) {
+      return next(new AppError("يجب إرسال عناصر العربة على شكل مصفوفة", 400));
+    }
+
+    //get usr cart items
+    const userCart = await Cart.findOne({ user: req.user.id });
+    if (!userCart || userCart.items.length < 1) {
+      return next(new AppError("عربة التسوق فارغة", 400));
+    }
+
+    for (const it of userCart.items) {
+      if (!it || !it.product) {
+        return next(
+          new AppError("كل عنصر يجب أن يحتوي على productRecordId", 400)
+        );
+      }
+      if (!it.meters || String(it.meters).trim().length < 1) {
+        return next(
+          new AppError("كل عنصر يجب أن يحتوي على quantityMeters", 400)
+        );
+      }
+      if (it.images && !Array.isArray(it.images)) {
+        return next(new AppError("Images في كل عنصر يجب أن تكون مصفوفة", 400));
+      }
+    }
+
+    const reservation = new Reservation({
+      customerName: body.customerName,
+      customerPhone: body.customerPhone,
+      customerAddress: body.customerAddress,
+      items: userCart.items,
+      isCartReservation: true,
+      note: body.note,
+    });
+
+    await reservation.save();
+    res.status(201).json(reservation);
+  } catch (err) {
+    next(new AppError(err.message || "Server error", 500));
+  }
+}
+
 // Admin: get all reservations
 export async function getReservations(req, res, next) {
   try {

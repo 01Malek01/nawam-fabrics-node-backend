@@ -18,6 +18,7 @@ export async function createProduct(req, res, next) {
       discount,
       discountText,
       isNewArrival,
+      stock,
     } = req.body;
     const images = req.files
       ? req.files
@@ -29,6 +30,7 @@ export async function createProduct(req, res, next) {
           .filter((f) => f.mimetype.startsWith("video/"))
           .map((f) => f.path)
       : [];
+
     const product = new Product({
       Name,
       PricePerMeter,
@@ -41,6 +43,7 @@ export async function createProduct(req, res, next) {
       discount,
       discountText,
       isNewArrival,
+      stock,
     });
     await product.save();
     res.status(201).json(product);
@@ -103,6 +106,7 @@ export async function getProducts(req, res, next) {
           isNewArrival: 1,
           createdAt: 1,
           updatedAt: 1,
+          stock: 1,
           mainCategoryName: { $arrayElemAt: ["$mainCategory.Name", 0] },
           subCategoryName: { $arrayElemAt: ["$subCategory.Name", 0] },
         },
@@ -142,7 +146,9 @@ export async function updateProduct(req, res, next) {
       discount,
       discountText,
       isNewArrival,
+      stock,
     } = req.body;
+
     let images = [];
     let videos = [];
     if (req.files && req.files.length > 0) {
@@ -170,6 +176,7 @@ export async function updateProduct(req, res, next) {
       discount,
       discountText,
       isNewArrival,
+      stock,
     };
     const product = await Product.findByIdAndUpdate(req.params.id, update, {
       new: true,

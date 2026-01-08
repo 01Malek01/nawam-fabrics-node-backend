@@ -20,4 +20,11 @@ router.get("/check-auth", checkAuth, (req, res) => {
   res.json({ loggedIn: true, user: req.user });
 });
 
+//logout route
+router.post("/logout", (req, res) => {
+  res.clearCookie("jwt");
+  req.user = null;
+  res.json({ message: "Logged out successfully", status: "success" });
+});
+
 export default router;

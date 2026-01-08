@@ -2,6 +2,10 @@ import mongoose from "mongoose";
 
 const reservationSchema = new mongoose.Schema(
   {
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
     customerName: { type: String, required: true },
     customerPhone: { type: String, required: true },
     quantityMeters: { type: String, required: true },
@@ -19,7 +23,20 @@ const reservationSchema = new mongoose.Schema(
     },
     chatSummary: { type: String },
     note: { type: String },
+    items: [
+      {
+        Images: [{ type: String }],
+        productRecordId: {
+          type: mongoose.Schema.Types.ObjectId,
+          required: true,
+          ref: "Product",
+        },
+        quantityMeters: { type: String, required: true },
+      },
+    ],
+    isCartReservation: { type: Boolean, default: false },
   },
+
   { timestamps: true }
 );
 
