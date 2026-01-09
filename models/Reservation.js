@@ -8,11 +8,10 @@ const reservationSchema = new mongoose.Schema(
     },
     customerName: { type: String, required: true },
     customerPhone: { type: String, required: true },
-    quantityMeters: { type: String, required: true },
+    quantityMeters: { type: String },
     customerAddress: { type: String, required: true },
     productRecordId: {
       type: mongoose.Schema.Types.ObjectId,
-      required: true,
       ref: "Product",
     },
     Images: [{ type: String }],

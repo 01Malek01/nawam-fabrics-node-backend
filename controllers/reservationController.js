@@ -1,6 +1,6 @@
 import Reservation from "../models/Reservation.js";
 import AppError from "../utils/AppError.js";
-
+import Cart from "../models/Cart.js";
 // Public: create a reservation (images come as array of URLs in body)
 export async function createReservation(req, res, next) {
   try {
@@ -69,13 +69,14 @@ export async function createCartReservation(req, res, next) {
     ) {
       return next(new AppError("العنوان يجب أن يكون على الأقل 5 أحرف", 400));
     }
-    // cart items: expect array of { productRecordId, quantityMeters, Images }
-    if (!Array.isArray(body.items) || body.items.length < 1) {
-      return next(new AppError("يجب إرسال عناصر العربة على شكل مصفوفة", 400));
-    }
 
     //get usr cart items
-    const userCart = await Cart.findOne({ user: req.user.id });
+    const userId = req?.user?.id;
+    if (!userId) {
+      return next(new AppError("المستخدم غير مصرح له", 401));
+    }
+
+    const userCart = await Cart.findOne({ user: userId });
     if (!userCart || userCart.items.length < 1) {
       return next(new AppError("عربة التسوق فارغة", 400));
     }
@@ -100,12 +101,17 @@ export async function createCartReservation(req, res, next) {
       customerName: body.customerName,
       customerPhone: body.customerPhone,
       customerAddress: body.customerAddress,
-      items: userCart.items,
+      items: userCart.items.map((it) => ({
+        Images: it.images || [],
+        productRecordId: it.product,
+        quantityMeters: it.meters,
+      })),
       isCartReservation: true,
       note: body.note,
     });
 
     await reservation.save();
+    await Cart.findOneAndDelete({ user: userId });
     res.status(201).json(reservation);
   } catch (err) {
     next(new AppError(err.message || "Server error", 500));
@@ -132,6 +138,7 @@ export async function getReservations(req, res, next) {
 
     const reservations = await Reservation.find(filter)
       .populate("productRecordId")
+      .populate("items.productRecordId")
       .sort(sortObj)
       .skip((page - 1) * limit)
       .limit(limit);
