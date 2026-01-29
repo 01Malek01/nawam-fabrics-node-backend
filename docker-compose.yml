@@ -5,8 +5,7 @@ services:
     ports:
       - "5000:5000"
     environment:
-      - MONGO_URI=mongodb://Oelnawam:byFusWxgRkFX8OkjZerEhzG4aO67AHo0cGvgzV5nPEwr8YKG5Xtd2VewsD4Rdk0GqPPLrfO5PEzKdUc0JkL7%2FA%3D%3D@mongo:27017/nawam-fabrics?authSource=admin
-
+      - MONGO_URI=mongodb://mongo:27017/nawam-fabrics
     depends_on:
       - mongo
     restart: unless-stopped
@@ -17,9 +16,6 @@ services:
     container_name: nawam-fabrics-mongo
     ports:
       - "27017:27017"
-    environment:
-      - MONGO_INITDB_ROOT_USERNAME=Oelnawam
-      - MONGO_INITDB_ROOT_PASSWORD=byFusWxgRkFX8OkjZerEhzG4aO67AHo0cGvgzV5nPEwr8YKG5Xtd2VewsD4Rdk0GqPPLrfO5PEzKdUc0JkL7%2FA%3D%3D
     volumes:
       - mongo_data:/data/db
     restart: unless-stopped
@@ -33,11 +29,6 @@ services:
       - ME_CONFIG_MONGODB_SERVER=mongo
       - ME_CONFIG_MONGODB_PORT=27017
       - ME_CONFIG_MONGODB_URL=mongodb://mongo:27017/nawam-fabrics
-      - ME_CONFIG_MONGODB_ADMINUSERNAME=Oelnawam
-      - ME_CONFIG_MONGODB_ADMINPASSWORD=byFusWxgRkFX8OkjZerEhzG4aO67AHo0cGvgzV5nPEwr8YKG5Xtd2VewsD4Rdk0GqPPLrfO5PEzKdUc0JkL7%2FA%3D%3D
-      - ME_CONFIG_BASICAUTH_USERNAME=Malek
-      - ME_CONFIG_BASICAUTH_PASSWORD=Malek555-
-
     depends_on:
       - mongo
     restart: unless-stopped

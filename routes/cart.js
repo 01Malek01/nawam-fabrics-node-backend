@@ -19,11 +19,11 @@ router.get("/", getCart);
 // Add an item (body: { productId, quantity, meters })
 router.post("/", addItemToCart);
 
-// Update an item by product id
-router.patch("/item/:productId", updateCartItem);
+// Update an item by itemId id
+router.patch("/item/:itemId", updateCartItem);
 
-// Remove an item by product id
-router.delete("/item/:productId", removeCartItem);
+// Remove an item by itemId id
+router.delete("/item/:itemId", removeCartItem);
 
 // Clear cart
 router.delete("/", clearCart);
