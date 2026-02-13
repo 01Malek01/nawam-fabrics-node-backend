@@ -176,8 +176,12 @@ export async function updateProduct(req, res, next) {
       discount,
       discountText,
       isNewArrival,
-      stock,
     };
+
+    // Only update stock if it's an array
+    if (Array.isArray(stock)) {
+      update.stock = stock;
+    }
     const product = await Product.findByIdAndUpdate(req.params.id, update, {
       new: true,
     });
