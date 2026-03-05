@@ -20,6 +20,11 @@ const productSchema = new mongoose.Schema(
         type: String,
       },
     ],
+    soldOutImages: [
+      {
+        type: String,
+      },
+    ],
     SubCategory: {
       type: mongoose.Schema.Types.ObjectId,
       required: false,

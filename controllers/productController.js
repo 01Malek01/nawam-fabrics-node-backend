@@ -19,7 +19,17 @@ export async function createProduct(req, res, next) {
       discountText,
       isNewArrival,
       stock,
+      soldOutImages,
     } = req.body;
+    let parsedSoldOutImages = [];
+    if (soldOutImages) {
+      try {
+        parsedSoldOutImages = typeof soldOutImages === "string" ? JSON.parse(soldOutImages) : soldOutImages;
+      } catch (e) {
+        parsedSoldOutImages = [];
+      }
+    }
+
     const images = req.files
       ? req.files
           .filter((f) => f.mimetype.startsWith("image/"))
@@ -44,6 +54,7 @@ export async function createProduct(req, res, next) {
       discountText,
       isNewArrival,
       stock,
+      soldOutImages: parsedSoldOutImages,
     });
     await product.save();
     res.status(201).json(product);
@@ -147,7 +158,18 @@ export async function updateProduct(req, res, next) {
       discountText,
       isNewArrival,
       stock,
+      soldOutImages,
     } = req.body;
+
+    let parsedSoldOutImages = [];
+    if (soldOutImages) {
+      try {
+        parsedSoldOutImages = typeof soldOutImages === "string" ? JSON.parse(soldOutImages) : soldOutImages;
+      } catch (e) {
+        parsedSoldOutImages = [];
+      }
+    }
+
 
     let images = [];
     let videos = [];
@@ -165,22 +187,30 @@ export async function updateProduct(req, res, next) {
       Name,
       PricePerMeter,
       Description,
-      Image:
-        images.length > 0
-          ? [...existingProduct.Image, ...images]
-          : existingProduct.Image,
-      SubCategory,
-      MainCategory,
-      VideoUrl: videos.length > 0 ? videos[0] : existingProduct.VideoUrl,
-      MostSold,
-      discount,
-      discountText,
       isNewArrival,
     };
 
+    if (parsedSoldOutImages !== undefined) {
+      update.soldOutImages = parsedSoldOutImages;
+    }
+
+
+
     // Only update stock if it's an array
-    if (Array.isArray(stock)) {
-      update.stock = stock;
+    // If stock is a string, try to parse it as JSON
+    if (stock !== undefined && stock !== null) {
+      let parsedStock = stock;
+      if (typeof stock === "string" && stock.trim()) {
+        try {
+          parsedStock = JSON.parse(stock);
+        } catch (e) {
+          // If parsing fails, skip the stock update
+          parsedStock = null;
+        }
+      }
+      if (Array.isArray(parsedStock)) {
+        update.stock = parsedStock;
+      }
     }
     const product = await Product.findByIdAndUpdate(req.params.id, update, {
       new: true,
@@ -261,6 +291,11 @@ export const deleteProductImage = async (req, res, next) => {
     }
 
     product.Image.splice(imageIndex, 1);
+    if (product.soldOutImages && product.soldOutImages.includes(removed)) {
+      product.soldOutImages = product.soldOutImages.filter(
+        (img) => img !== removed
+      );
+    }
     await product.save();
     res.json(product);
   } catch (err) {
