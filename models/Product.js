@@ -55,6 +55,10 @@ const productSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    isOutOfStock: {
+      type: Boolean,
+      default: false,
+    },
     stock: [
       {
         color: {
@@ -66,7 +70,7 @@ const productSchema = new mongoose.Schema(
       },
     ],
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 const Product = mongoose.model("Product", productSchema);

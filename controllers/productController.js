@@ -56,6 +56,7 @@ export async function createProduct(req, res, next) {
       discount,
       discountText,
       isNewArrival,
+      isOutOfStock,
       stock,
       soldOutImages: parsedSoldOutImages,
     });
@@ -118,6 +119,7 @@ export async function getProducts(req, res, next) {
           discount: 1,
           discountText: 1,
           isNewArrival: 1,
+          isOutOfStock: 1,
           createdAt: 1,
           soldOutImages: 1,
           updatedAt: 1,
@@ -161,6 +163,7 @@ export async function updateProduct(req, res, next) {
       discount,
       discountText,
       isNewArrival,
+      isOutOfStock,
       stock,
       soldOutImages,
     } = req.body;
@@ -205,6 +208,7 @@ export async function updateProduct(req, res, next) {
       discount,
       discountText,
       isNewArrival,
+      isOutOfStock,
     };
 
     if (parsedSoldOutImages !== undefined) {
