@@ -4,6 +4,16 @@ import mongoose from "mongoose";
 import fs from "fs";
 import path from "path";
 
+function normalizeBoolean(value) {
+  if (typeof value === "boolean") return value;
+  if (typeof value === "string") {
+    const normalized = value.trim().toLowerCase();
+    if (normalized === "true") return true;
+    if (normalized === "false") return false;
+  }
+  return undefined;
+}
+
 // Create product
 export async function createProduct(req, res, next) {
   try {
@@ -18,9 +28,14 @@ export async function createProduct(req, res, next) {
       discount,
       discountText,
       isNewArrival,
+      isOutOfStock,
       stock,
       soldOutImages,
     } = req.body;
+    const normalizedMostSold = normalizeBoolean(MostSold);
+    const normalizedIsNewArrival = normalizeBoolean(isNewArrival);
+    const normalizedIsOutOfStock = normalizeBoolean(isOutOfStock);
+
     let parsedSoldOutImages = [];
     if (soldOutImages) {
       try {
@@ -52,11 +67,11 @@ export async function createProduct(req, res, next) {
       SubCategory,
       MainCategory,
       VideoUrl: videos[0] || VideoUrl,
-      MostSold,
+      MostSold: normalizedMostSold ?? MostSold,
       discount,
       discountText,
-      isNewArrival,
-      isOutOfStock,
+      isNewArrival: normalizedIsNewArrival ?? isNewArrival,
+      isOutOfStock: normalizedIsOutOfStock ?? isOutOfStock,
       stock,
       soldOutImages: parsedSoldOutImages,
     });
@@ -159,17 +174,21 @@ export async function updateProduct(req, res, next) {
       SubCategory,
       MainCategory,
       VideoUrl,
-      MostSold,
+      MostSold: mostSoldInput,
       discount,
       discountText,
-      isNewArrival,
-      isOutOfStock,
+      isNewArrival: isNewArrivalInput,
+      isOutOfStock: isOutOfStockInput,
       stock,
       soldOutImages,
     } = req.body;
 
-    let parsedSoldOutImages = [];
-    if (soldOutImages) {
+    const normalizedMostSold = normalizeBoolean(mostSoldInput);
+    const normalizedIsNewArrival = normalizeBoolean(isNewArrivalInput);
+    const normalizedIsOutOfStock = normalizeBoolean(isOutOfStockInput);
+
+    let parsedSoldOutImages;
+    if (soldOutImages !== undefined) {
       try {
         parsedSoldOutImages =
           typeof soldOutImages === "string"
@@ -196,7 +215,6 @@ export async function updateProduct(req, res, next) {
       Name,
       PricePerMeter,
       Description,
-      isNewArrival,
       Image:
         images.length > 0
           ? [...existingProduct.Image, ...images]
@@ -204,11 +222,17 @@ export async function updateProduct(req, res, next) {
       SubCategory,
       MainCategory,
       VideoUrl: videos.length > 0 ? videos[0] : existingProduct.VideoUrl,
-      MostSold,
       discount,
       discountText,
-      isNewArrival,
-      isOutOfStock,
+      ...(mostSoldInput !== undefined && {
+        MostSold: normalizedMostSold ?? mostSoldInput,
+      }),
+      ...(isNewArrivalInput !== undefined && {
+        isNewArrival: normalizedIsNewArrival ?? isNewArrivalInput,
+      }),
+      ...(isOutOfStockInput !== undefined && {
+        isOutOfStock: normalizedIsOutOfStock ?? isOutOfStockInput,
+      }),
     };
 
     if (parsedSoldOutImages !== undefined) {
