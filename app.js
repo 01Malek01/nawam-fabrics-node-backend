@@ -13,6 +13,9 @@ import cartRoutes from "./routes/cart.js";
 import adminReservationRoutes from "./routes/adminReservations.js";
 import adminLastPieceRoutes from "./routes/adminLastPiece.js";
 import lastPiecePublicRoutes from "./routes/lastPiecePublic.js";
+import adminPostsRoutes from "./routes/adminPosts.js";
+import postPublicRoutes from "./routes/postPublic.js";
+import sitemapRoutes from "./routes/sitemap.js";
 
 const app = express();
 
@@ -101,10 +104,15 @@ app.use("/api/admin", adminProductRoutes);
 app.use("/api/admin", adminCategoryRoutes);
 app.use("/api/admin", adminReservationRoutes);
 app.use("/api/admin", adminLastPieceRoutes);
+app.use("/api/admin", adminPostsRoutes);
 app.use("/api", publicRoutes);
 app.use("/api", lastPiecePublicRoutes);
 app.use("/api/reservations", reservationRoutes);
 app.use("/api/cart", cartRoutes);
+app.use("/api", postPublicRoutes);
+
+// Dynamic sitemap (top-level path so it matches robots.txt)
+app.use("/", sitemapRoutes);
 
 // Global error handler
 app.use(globalErrorHandler);
